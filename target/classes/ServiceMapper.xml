@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chen.mapper.ServiceMapper">
+    <!-- 自定义返回结果集 -->
+    <resultMap id="serviceMapper" type="ServiceBean">
+        <result property="email" column="email" javaType="java.lang.String"></result>
+        <result property="projectName" column="project_name" javaType="java.lang.String"></result>
+        <result property="clientId" column="client_id" javaType="java.lang.String"></result>
+        <result property="createTime" column="create_time" javaType="java.lang.String"></result>
+        <result property="authorizationCode" column="authorization_code" javaType="java.lang.String"></result>
+        <result property="serverType" column="server_type" javaType="java.lang.Integer"></result>
+        <result property="redirectUri" column="redirect_uri" javaType="java.lang.String"></result>
+    </resultMap>
+    <resultMap id="codeMap" type="String">
+        <result property="authorizationCode" column="authorization_code" javaType="java.lang.String"></result>
+    </resultMap>
+    <resultMap id="uri" type="String">
+        <result property="redirectUri" column="redirect_uri" javaType="java.lang.String"></result>
+    </resultMap>
+    <resultMap id="type" type="int">
+        <result property="type" column="server_type" javaType="java.lang.Integer"></result>
+    </resultMap>
+    <!-- 在各种标签中的id属性必须和接口中的方法名相同 ， id属性值必须是唯一的，不能够重复使用。parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型-->
+    <!-- useGeneratedKeys：（ 仅 对 insert 有 用 ） 这 会 告 诉 MyBatis 使 用 JDBC 的getGeneratedKeys
+                方法来取出由数据（比如：像 MySQL 和 SQLServer 这样的数据库管理系统的自动递增字段）内部生成的主键。默认值： false。 -->
+    <!--keyProperty： （仅对 insert有用）标记一个属性， MyBatis 会通过 getGeneratedKeys或者通过 insert 语句的 selectKey 子元素设置它的值。默认：不设置。 -->
+    <!--#{}中的内容，为占位符，当参数为某个JavaBean时，表示放置该Bean对象的属性值  -->
+
+
+    <insert id="addService" useGeneratedKeys="true" keyProperty="email">
+        insert into t_service_oauth (email,project_name,client_id,create_time,server_type,redirect_uri,authorization_code )
+        values (#{email},#{projectName},#{clientId},#{createTime},#{serverType},#{redirectUri},#{authorizationCode})
+    </insert>
+
+    <select id="selectCodeByClientid" parameterType="String" resultMap="codeMap">
+        SELECT authorization_code FROM t_service_oauth WHERE client_id = #{clientId}
+    </select>
+
+    <update id="updateAccessToken" parameterType="String" >
+        update t_service_oauth set access_token = #{1} where client_id = #{0}
+    </update>
+
+    <update id="setRefreshToken">
+        UPDATE t_service_oauth SET refresh_token = #{1} WHERE client_id = #{0}
+    </update>
+
+    <select id="getTypeByClientId" parameterType="String" resultMap="type">
+        SELECT server_type FROM t_service_oauth WHERE client_id = #{clientId}
+    </select>
+
+    <select id="selectUriByClientId" parameterType="String" resultMap="uri">
+        SELECT redirect_uri FROM t_service_oauth WHERE client_id = #{clientId}
+    </select>
+
+    <update id="updateTime">
+        UPDATE t_service_oauth SET update_time = #{1} WHERE client_id = #{0}
+    </update>
+
+    <select id="selectServiceByEmail" parameterType="String" resultMap="serviceMapper">
+        SELECT * FROM t_service_oauth WHERE email = #{email}
+    </select>
+</mapper>
